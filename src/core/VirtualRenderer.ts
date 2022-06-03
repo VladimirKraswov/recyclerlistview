@@ -9,6 +9,8 @@ import { ObjectUtil, Default } from "ts-object-utils";
 import TSCast from "../utils/TSCast";
 import { BaseDataProvider } from "./dependencies/DataProvider";
 
+const IS_ANDROID = Platform.OS === "android";
+const MAGIC_NUMBER = 200; //TODO: item width
 /***
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
  */
@@ -98,11 +100,8 @@ export default class VirtualRenderer {
 
     public updateOffset(offsetX: number, offsetY: number, isActual: boolean, correction: WindowCorrection): void {
         if (this._viewabilityTracker) {
-            const offset = this._params && this._params.isHorizontal ?
-            I18nManager.isRTL && Platform.OS === "android" ?
-                this.getLayoutDimension().width - offsetX -200:
-                offsetX
-            : offsetY;
+            const rtlOffsetX = I18nManager.isRTL && IS_ANDROID ? this.getLayoutDimension().width - offsetX - MAGIC_NUMBER : offsetX;
+            const offset = this._params && this._params.isHorizontal ? rtlOffsetX : offsetY;
             if (!this._isViewTrackerRunning) {
                 if (isActual) {
                     this._viewabilityTracker.setActualOffset(offset);
